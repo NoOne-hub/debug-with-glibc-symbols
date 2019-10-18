@@ -1,0 +1,50 @@
+#!/bin/bash
+set -e
+# set arguments num
+if [ $# != 2 ];then
+    echo "Too few arguments"
+    echo "Usage: set_libc libc_version filename"
+    exit
+fi
+
+LIBC_DIR=/usr/lib/glibc/
+FILE_NAME=$1
+LIBC_VERSION=$2
+
+# arch
+temp=$(file $FILE_NAME |awk '{print$3}'|cut -c 1-2)
+if [ $temp -eq "32" ];then
+    BITS="i386"
+elif [ $temp -eq "64" ];then
+    BITS="amd64"
+else
+    echo "It's not a elf file"
+    exit
+fi
+
+tmp=`mktemp -d`
+cp $FILE_NAME $tmp/
+FILE=$tmp/$FILE_NAME
+
+# exist libc_version
+debug_libc_dir=$(find $LIBC_DIR -name "*$LIBC_VERSION*$BITS")
+if [ "$debug_libc_dir" = "" ];then
+    echo "Not support version or your $LIBC_DIR don't have libc"
+    exit
+fi
+
+# patchelf exist
+if command -v patchelf >/dev/null 2>&1; then
+    echo 'patchelf exist'
+else
+    echo 'no exists patchelf'
+    echo "install patchelf first"
+    exit
+fi
+
+patchelf --set-interpreter $debug_libc_dir/ld-$LIBC_VERSION.so $FILE
+patchelf --set-rpath $debug_libc_dir/ $FILE
+
+echo "Patch success!"
+echo "File_dir: $FILE"
+
