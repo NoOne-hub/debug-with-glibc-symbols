@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 # set arguments num
-if [ $# != 2 ];then
+if [ $# -lt 2 ];then
     echo "Too few arguments"
     echo "Usage: set_libc libc_version filename"
     exit
@@ -43,8 +43,13 @@ else
 fi
 
 patchelf --set-interpreter $debug_libc_dir/ld-$LIBC_VERSION.so $FILE
-patchelf --set-rpath $debug_libc_dir/ $FILE
+if [ $3 ];then
+    echo $PWD
+    patchelf --replace-needed libc.so.6 $PWD/$3 $FILE
+else
+    patchelf --replace-needed libc.so.6 $debug_libc_dir/libc-$LIBC_VERSION.so $FILE
+fi
+
 
 echo "Patch success!"
 echo "File_dir: $FILE"
-

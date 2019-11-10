@@ -21,6 +21,7 @@ fi
 
 # set for bash
 mv set_libc /usr/local/bin/
+chmod +x set_libc
 
 
 
