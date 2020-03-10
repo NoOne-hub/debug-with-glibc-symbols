@@ -9,7 +9,7 @@ else
 fi
 
 # 移动目录
-mv -r glibc/ /usr/lib/
+mv glibc/ /usr/lib/
 
 if command -v apt >/dev/null 2>&1; then
     apt install patchelf
